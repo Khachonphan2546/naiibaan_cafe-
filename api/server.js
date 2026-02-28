@@ -10,7 +10,6 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 
-// ✅ 1. ตั้งค่า CORS แบบสมบูรณ์ (อนุญาตทุกแหล่งที่มาเพื่อรองรับ ngrok)
 app.use(cors({
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -27,7 +26,7 @@ app.use((req, res, next) => {
 });
 
 // 2. เปิดการเข้าถึงโฟลเดอร์สาธารณะ
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 // ✅ เปิดโฟลเดอร์ uploads ให้สามารถเข้าถึงรูปภาพผ่าน URL ได้
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
@@ -274,6 +273,7 @@ app.get('/api/orders/customer/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Error" }); }
 });
 
+
 app.delete('/api/clear-orders', async (req, res) => {
     const client = await pool.connect();
     try {
@@ -343,6 +343,8 @@ app.post('/api/google-login', async (req, res) => {
         res.status(400).json({ success: false, message: 'การตรวจสอบข้อมูล Google ล้มเหลว' });
     }
 });
+
+
 
 
 // ✅ รันเซิร์ฟเวอร์พร้อมบอกสถานะ
