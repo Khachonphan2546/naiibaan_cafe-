@@ -1,4 +1,4 @@
-fetch('http://localhost:3000/products')
+fetch('https://naiibaan-cafe.onrender.com')
     .then(res => res.json())
     .then(data => {
         const container = document.getElementById('product-list');
