@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วิธีรับสินค้า - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root { --prompt-orange: #FD7E14; --bg-light: #FFF8F0; }
+        body { background-color: var(--bg-light); font-family: 'Sarabun', sans-serif; padding: 60px 20px; text-align: center; margin: 0; }
+        
+        .guide-title { font-weight: 700; font-size: 2.2rem; margin-bottom: 20px; color: #333; }
+        .sub-guide { color: #888; margin-bottom: 60px; }
+
+        .steps-wrapper { position: relative; display: flex; justify-content: space-between; max-width: 900px; margin: auto; padding: 0 20px; }
+        .step-unit { flex: 1; position: relative; z-index: 5; }
+        
+        .step-visual-wrap { 
+            width: 90px; height: 90px; background: white; 
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; margin: 0 auto 25px;
+            color: var(--prompt-orange); font-size: 35px;
+            border: 4px solid #FFF3E0;
+            box-shadow: 0 8px 20px rgba(253,126,20,0.1);
+        }
+        
+        .step-label { font-weight: 700; font-size: 1.2rem; margin-bottom: 10px; color: #444; }
+        .step-label::after { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--prompt-orange); border-radius: 50%; margin-left: 8px; }
+        
+        .step-subtext { font-size: 0.95rem; color: #666; line-height: 1.6; }
+        .dotted-line { position: absolute; top: 45px; left: 15%; width: 70%; height: 2px; border-top: 3px dashed #FFD580; z-index: 1; opacity: 0.6; }
+        
+        .btn-home { 
+            background: var(--prompt-orange); color: white; border: none; 
+            padding: 18px 80px; border-radius: 20px; font-weight: 700; 
+            font-size: 1.3rem; margin-top: 60px; 
+            box-shadow: 0 10px 30px rgba(253,126,20,0.2);
+            transition: 0.3s; cursor: pointer; text-decoration: none; display: inline-block;
+        }
+        .btn-home:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(253,126,20,0.3); color: white; }
+
+        @media (max-width: 576px) {
+            .steps-wrapper { flex-direction: column; gap: 40px; }
+            .dotted-line { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2 class="guide-title">สั่งซื้อเรียบร้อยแล้ว!</h2>
+    <p class="sub-guide">กรุณาปฏิบัติตามขั้นตอนด้านล่างเพื่อรับสินค้า</p>
+
+    <div class="steps-wrapper">
+        <div class="dotted-line"></div>
+
+        <div class="step-unit">
+            <div class="step-visual-wrap">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="step-label">1. ยืนยันคำสั่งซื้อ</div>
+            <div class="step-subtext">ชำระเงิน/ยืนยันสลิปการโอน<br>ได้ที่เคาน์เตอร์เพื่อยืนยันการสั่งซื้อ</div>
+        </div>
+        
+        <div class="step-unit">
+            <div class="step-visual-wrap">
+                <i class="fas fa-mobile-screen-button"></i>
+            </div>
+            <div class="step-label">2. เช็คเลขออเดอร์</div>
+            <div class="step-subtext">ตรวจสอบหมายเลขสั่งซื้อ<br>ในหน้าประวัติของคุณ</div>
+        </div>
+
+        <div class="step-unit">
+            <div class="step-visual-wrap">
+                <i class="fas fa-mug-hot"></i>
+            </div>
+            <div class="step-label">3. รอรับสินค้า</div>
+            <div class="step-subtext">รอพนักงานเรียกคิวรับสินค้า<br>ที่หน้าเคาน์เตอร์ได้เลยครับ</div>
+        </div>
+    </div>
+
+    <button class="btn-home" onclick="finishAll()">กลับสู่หน้าหลัก</button>
+
+    <script>
+        
+        const API_URL = 'http://localhost:3001';
+
+        function finishAll() {
+            // ล้างข้อมูลตะกร้าสินค้า
+            localStorage.removeItem('customer_cart');
+            
+            // ส่งกลับไปยังหน้าสั่งซื้อสินค้าหลัก
+            window.location.href = 'customer_order.html'; 
+        }
+
+        // เพิ่มเติม: เช็คสถานะการ Login เพื่อความปลอดภัย
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>

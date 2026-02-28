@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าสั่งซื้อ - Naii Baan POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-orange: #FD7E14;
+            --bg-cream: #FFF8F0;
+            --text-dark: #333;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            font-family: 'Sarabun', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #828282;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #333;
+        }
+
+        .nav-links-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-link-custom {
+            text-decoration: none;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 8px 15px;
+            border-radius: 12px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link-custom:hover {
+            background: #FFF8F0;
+            color: var(--primary-orange);
+        }
+
+        .nav-link-custom.active {
+            color: var(--primary-orange) !important;
+            background: #FFF3E0;
+        }
+
+        .btn-logout {
+            color: #dc3545 !important;
+            cursor: pointer;
+        }
+
+        /* Layout */
+        .pos-container {
+            display: flex;
+            height: calc(100vh - 76px);
+        }
+
+        .product-section {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .category-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 35px;
+            position: relative;
+            width: 100%;
+        }
+
+        .main-cats {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .cat-btn {
+            border: none;
+            background: #FFE0B2;
+            color: #E65100;
+            padding: 8px 30px;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .cat-btn.active {
+            background: var(--primary-orange);
+            color: white;
+            box-shadow: 0 4px 10px rgba(253, 126, 20, 0.2);
+        }
+
+        #subFilterBar {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: -10px;
+        }
+
+        .dropdown-menu {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-top: 4px solid var(--primary-orange);
+            padding: 10px 0;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 25px;
+            gap: 12px;
+            font-weight: 600;
+            color: #555;
+            transition: 0.2s;
+        }
+
+        .search-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: 0.3s;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .product-img {
+            height: 180px;
+            width: 100%;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+
+        .product-info-container {
+            padding: 15px;
+        }
+
+        .product-name-txt {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .price-qty-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .product-price-txt {
+            font-weight: 700;
+            color: var(--primary-orange);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .qty-capsule {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #F8F9FA;
+            border-radius: 50px;
+            padding: 4px 8px;
+        }
+
+        .btn-qty-pos {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-minus-pos {
+            background: white;
+            color: #ADB5BD;
+        }
+
+        .btn-plus-pos {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .qty-display-txt {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #333;
+            min-width: 15px;
+            text-align: center;
+        }
+
+        .option-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option-card:hover {
+            background-color: #fafafa;
+            border-color: var(--primary-orange);
+        }
+
+        .option-card.active {
+            background-color: #FFF3E0;
+            border-color: var(--primary-orange);
+        }
+
+        .option-card span {
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        /* Cart Sidebar */
+        .cart-section {
+            width: 420px;
+            background: white;
+            border-left: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .cart-footer {
+            padding: 25px;
+            background: #fdfdfd;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary-orange);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="top-navbar">
+        <a href="pos.html" class="brand-section">
+            <img src="Naii.png" class="brand-logo" alt="Logo">
+            <span class="brand-name">Naii Baan POS</span>
+        </a>
+        <div class="nav-links-group">
+            <a href="pos.html" class="nav-link-custom active"><i class="fas fa-shopping-basket"></i> หน้าสั่งซื้อ</a>
+            <a href="queue.html" class="nav-link-custom"><i class="fas fa-list-ol"></i> รายการคิว</a>
+            <a href="sales_summary.html" class="nav-link-custom"><i class="fas fa-file-invoice-dollar"></i> สรุปยอด</a>
+            <div onclick="logout()" class="nav-link-custom btn-logout"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+            </div>
+        </div>
+    </nav>
+
+    <div class="pos-container">
+        <section class="product-section">
+            <div class="category-wrapper">
+                <div class="search-wrap">
+                    <input type="text" class="form-control rounded-pill shadow-sm" placeholder="ค้นหาเมนู..."
+                        onkeyup="filterSearch(this.value)">
+                </div>
+
+                <div id="categoryFilters" class="main-cats">
+                    <button class="cat-btn active" onclick="filterCategoryByText('ขนมหวาน', this)">ขนมหวาน</button>
+                    <button class="cat-btn" onclick="filterCategoryByText('เครื่องดื่ม', this)">เครื่องดื่ม</button>
+                    <button class="cat-btn" onclick="filterCategoryByText('โปรโมชั่น', this)">โปรโมชั่น</button>
+                </div>
+
+                <div id="subFilterBar" style="display: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-warning dropdown-toggle rounded-pill px-4 fw-bold text-white shadow-sm"
+                            type="button" id="subCatDropdown" data-bs-toggle="dropdown"
+                            style="background-color: var(--primary-orange); border:none; min-width: 220px;">
+                            <i class="fas fa-filter me-2"></i>ทั้งหมด
+                        </button>
+                        <ul class="dropdown-menu shadow border-0">
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('all', 'ทั้งหมด')">
+                                    ทั้งหมด</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('กาแฟ', 'กาแฟ')"> กาแฟ</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('นม', 'นม')"> นม</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('สมูทตี้', 'สมูทตี้')">
+                                    สมูทตี้</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('โซดา', 'โซดา')"> โซดา</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('มัทฉะ', 'มัทฉะ')">
+                                    มัทฉะ</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterSubCategory('ชา', 'ชา')"> ชา</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div id="productGrid" class="row g-4"></div>
+        </section>
+
+        <aside class="cart-section">
+            <div class="cart-header text-center py-3 border-bottom">
+                <h5 class="fw-bold mb-0">รายการสั่งซื้อ</h5>
+            </div>
+            <div id="cartItems" class="cart-body"></div>
+            <div class="cart-footer">
+                <div class="d-flex justify-content-between mb-3"><span class="fs-5 fw-bold">ยอดรวมทั้งหมด</span><span
+                        class="fs-3 fw-bold" style="color:var(--primary-orange)"><span
+                            id="totalPriceDisplay">0.00</span> ฿</span></div>
+                <button class="btn-pay" onclick="goToPayment()">ชำระเงิน</button>
+            </div>
+        </aside>
+    </div>
+
+    <div class="modal fade" id="optionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 25px;">
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-4" id="modalProdName">เมนู</h5>
+                    <div id="optionsContainer"></div>
+                    <button class="btn btn-warning w-100 mt-4 rounded-pill fw-bold py-2 text-white"
+                        onclick="confirmDrinkOption()">เพิ่มลงรายการ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3001';
+        let allProducts = [], cart = {}, tempProduct = null, selectedOpt = { name: '', price: 0 };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('user')) { window.location.href = 'login.html'; return; }
+            await loadData();
+        });
+
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        async function loadData() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                allProducts = await res.json();
+                filterCategoryByText('ขนมหวาน', document.querySelector('.cat-btn.active'));
+            } catch (e) { document.getElementById('productGrid').innerHTML = 'เชื่อมต่อไม่สำเร็จ'; }
+        }
+
+        function filterCategoryByText(catName, btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            const subBar = document.getElementById('subFilterBar');
+            if (catName === 'เครื่องดื่ม') {
+                subBar.style.display = 'flex';
+                filterSubCategory('all', 'ทั้งหมด');
+            } else {
+                subBar.style.display = 'none';
+                renderProducts(allProducts.filter(p => p.category_name === catName));
+            }
+        }
+
+        function filterSubCategory(keyword, label) {
+            const dropdownBtn = document.getElementById('subCatDropdown');
+            if (dropdownBtn) dropdownBtn.innerHTML = label.includes('ทั้งหมด') ? `<i class="fas fa-filter me-2"></i>${label}` : label;
+            const cleanKeyword = keyword === 'all' ? 'all' : keyword.replace(/[^\u0E00-\u0E7Fa-zA-Z]/g, '').trim();
+            let drinkList = allProducts.filter(p => p.category_name === 'เครื่องดื่ม');
+            if (cleanKeyword !== 'all') drinkList = drinkList.filter(p => p.sub_category === cleanKeyword);
+            renderProducts(drinkList);
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            if (products.length === 0) { grid.innerHTML = '<div class="col-12 text-center py-5">ไม่พบเมนูในหมวดนี้</div>'; return; }
+            grid.innerHTML = products.map(p => {
+                let totalInCart = 0;
+                Object.keys(cart).forEach(key => { if (key.startsWith(p.product_id + "_") || key == p.product_id) totalInCart += cart[key].qty; });
+                return `
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="product-card">
+                        <img src="${API_URL}${p.image}" class="product-img" onerror="this.src='https://via.placeholder.com/200'">
+                        <div class="product-info-container">
+                            <span class="product-name-txt text-truncate">${p.product_name}</span>
+                            <div class="price-qty-row">
+                                <p class="product-price-txt">${parseFloat(p.price).toFixed(2)} ฿</p>
+                                <div class="qty-capsule">
+                                    <button class="btn-qty-pos btn-minus-pos" onclick="handleQtyChange(${p.product_id}, -1)">-</button>
+                                    <span class="qty-display-txt fw-bold">${totalInCart}</span>
+                                    <button class="btn-qty-pos btn-plus-pos" onclick="handleQtyChange(${p.product_id}, 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // แก้ไข: ปรับปรุงฟังก์ชันการเพิ่มสินค้าให้รองรับ Modal ทั้งน้ำและขนม (ไซส์ S/M)
+        function handleQtyChange(id, change) {
+            const p = allProducts.find(x => x.product_id == id);
+            if (!p) return;
+
+            // กรณี "ลด" จำนวน (ลบจากตะกร้า)
+            if (change < 0) {
+                const keys = Object.keys(cart).filter(k => k.startsWith(id + "_") || k == id);
+                if (keys.length > 0) updateCartLogic(keys[0], -1);
+                return;
+            }
+
+            // --- กรณี "เพิ่ม" จำนวน ---
+            
+            // 1. ตรวจสอบว่าสินค้ามี Drink Options หรือไม่ (ไม่ว่าจะเป็น ร้อน/เย็น/ปั่น หรือ S/M)
+            if (p.drink_options) {
+                
+                // ข้าม Modal สำหรับ สมูทตี้ และ โซดา (ให้ลงตะกร้าทันทีตามกฎเดิมของร้าน)
+                const isDirectAdd = (p.sub_category === 'สมูทตี้' || p.sub_category === 'โซดา');
+                if (isDirectAdd) {
+                    const defaultOption = p.drink_options.split(',')[0];
+                    updateCartLogic(`${p.product_id}_${defaultOption}`, 1, p.product_name, p.price, p.product_id);
+                    return;
+                }
+
+                // เปิด Modal สำหรับสินค้าอื่นๆ ที่มี Options
+                tempProduct = p;
+                document.getElementById('modalProdName').innerText = p.product_name;
+
+                // รวมเทมเพลตตัวเลือกทั้งหมด (ทั้งน้ำและขนม) 
+                const templates = [
+                    { id: 'S', name: 'Size S', price: 0,  },
+                    { id: 'M', name: 'Size M', price: 50, },
+                    { id: 'ร้อน', name: 'ร้อน', price: 0, },
+                    { id: 'เย็น', name: 'เย็น', price: 10, },
+                    { id: 'ปั่น', name: 'ปั่น', price: 15,}
+                ];
+
+                const available = p.drink_options.split(',');
+                const filtered = templates.filter(t => available.includes(t.id));
+
+                // แสดงปุ่มเลือกใน Modal
+                document.getElementById('optionsContainer').innerHTML = filtered.map((opt, idx) => `
+                    <div class="option-card ${idx === 0 ? 'active' : ''}" onclick="selectOpt('${opt.name}', ${opt.price}, this)">
+                        <span><i class="fas ${opt.icon} me-2 ${opt.color}"></i> ${opt.name}</span>
+                        <span class="text-muted">${opt.price > 0 ? '+ ' + opt.price + ' ฿' : 'ราคาปกติ'}</span>
+                    </div>
+                `).join('');
+
+                selectedOpt = { name: filtered[0].name, price: filtered[0].price };
+                new bootstrap.Modal(document.getElementById('optionModal')).show();
+
+            } else {
+                // 2. ถ้าไม่มีออปชั่น (สินค้าปกติ) ให้เพิ่มลงตะกร้าทันที
+                updateCartLogic(id, 1, p.product_name, p.price, id);
+            }
+        }
+
+        // ฟังก์ชันเลือกออปชั่นใน Modal
+        function selectOpt(name, price, el) {
+            selectedOpt = { name: name, price: price };
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        //ฟังก์ชันยืนยันการเลือกจาก Modal ลงตะกร้า (รองรับทั้งขนมและน้ำ)
+        function confirmDrinkOption() {
+            // สร้างชื่อที่แสดงในตะกร้า เช่น "บิงซูสตรอว์เบอร์รี่ (Size M)"
+            const fullName = `${tempProduct.product_name} (${selectedOpt.name})`;
+            const finalPrice = parseFloat(tempProduct.price) + selectedOpt.price;
+            
+            // ใช้คีย์รวม (ID + Option) เพื่อแยกรายการในตะกร้า
+            updateCartLogic(`${tempProduct.product_id}_${selectedOpt.name}`, 1, fullName, finalPrice, tempProduct.product_id);
+            
+            // ปิด Modal
+            const modalEl = document.getElementById('optionModal');
+            bootstrap.Modal.getInstance(modalEl).hide();
+        }
+
+        // ฟังก์ชันจัดการ Logic ตะกร้าสินค้า (ใช้ร่วมกันทั้งหมด)
+        function updateCartLogic(key, change, name, price, originalId) {
+            if (!cart[key]) cart[key] = { qty: 0, name: name, price: price, id: originalId || key };
+            cart[key].qty += change;
+            if (cart[key].qty <= 0) delete cart[key];
+            
+            updateCartUI();
+
+            // อัปเดตตัวเลขจำนวนบนการ์ดสินค้าตามหมวดหมู่ที่เปิดอยู่
+            const activeBtn = document.querySelector('.cat-btn.active');
+            if (activeBtn) {
+                const activeText = activeBtn.innerText;
+                if (activeText === 'เครื่องดื่ม') {
+                    const subBtnLabel = document.getElementById('subCatDropdown').innerText.trim();
+                    filterSubCategory(subBtnLabel.includes('ทั้งหมด') ? 'all' : subBtnLabel.replace(/[^\u0E00-\u0E7Fa-zA-Z]/g, ''), subBtnLabel);
+                } else {
+                    renderProducts(allProducts.filter(p => p.category_name === activeText));
+                }
+            }
+        }
+        function updateCartUI() {
+            const container = document.getElementById('cartItems');
+            let total = 0; const items = Object.entries(cart);
+            if (items.length === 0) { container.innerHTML = '<div class="text-center py-5 text-muted opacity-50"><p>ยังไม่มีรายการสินค้า</p></div>'; document.getElementById('totalPriceDisplay').innerText = '0.00'; return; }
+            container.innerHTML = items.map(([k, i]) => {
+                total += i.price * i.qty;
+                return `<div class="cart-item py-2 border-bottom d-flex justify-content-between align-items-center">
+                    <div><div class="fw-bold">${i.name}</div><div class="small">฿${parseFloat(i.price).toFixed(2)}</div></div>
+                    <div class="d-flex align-items-center"><div class="fw-bold text-end">x ${i.qty}<br>฿${(i.price * i.qty).toFixed(2)}</div>
+                    <i class="fas fa-trash-alt text-danger ms-3" style="cursor:pointer" onclick="removeFromCart('${k}')"></i></div></div>`;
+            }).join('');
+            document.getElementById('totalPriceDisplay').innerText = total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        }
+
+        function removeFromCart(key) { delete cart[key]; updateCartLogic('', 0, '', 0); }
+        function filterSearch(text) { renderProducts(allProducts.filter(p => p.product_name.toLowerCase().includes(text.toLowerCase()))); }
+        function goToPayment() { const items = Object.values(cart).map(i => ({ product_id: i.id, product_name: i.name, quantity: i.qty, price: i.price })); if (items.length === 0) return alert('เลือกสินค้าก่อน'); localStorage.setItem('pos_cart', JSON.stringify(items)); window.location.href = 'payment.html'; }
+    </script>
+</body>
+
+</html>

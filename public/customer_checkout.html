@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดการสั่งซื้อ - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-orange: #FD7E14;
+            --bg-cream: #FFF8F0;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            font-family: 'Sarabun', sans-serif;
+            padding: 40px 20px;
+        }
+
+        .checkout-card {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .cafe-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .cafe-title {
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .order-list-container {
+            border-top: 1px dashed #ddd;
+            border-bottom: 1px dashed #ddd;
+            padding: 20px 0;
+            margin-bottom: 25px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #444;
+            display: block;
+        }
+
+        .item-price-qty {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .item-total {
+            font-weight: 600;
+            color: #333;
+            margin-right: 15px;
+        }
+
+        .btn-delete {
+            color: #dc3545;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .btn-delete:hover {
+            background-color: #fff1f0;
+            transform: scale(1.1);
+        }
+
+        .summary-section {
+            background: #fcfcfc;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-total {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #222;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-back {
+            background: #990000;
+            color: white;
+        }
+
+        .btn-confirm {
+            background: #008000;
+            color: white;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="checkout-card">
+
+        <h4 class="text-center fw-bold mb-4">รายละเอียดการสั่งซื้อ</h4>
+
+        <div class="order-list-container" id="itemList"></div>
+
+        <div class="summary-section shadow-sm">
+            <div class="summary-row">
+                <span class="text-muted">จำนวนรายการทั้งหมด</span>
+                <span><b id="qtyTotal">0</b> รายการ</span>
+            </div>
+            <div class="summary-row summary-total">
+                <span>รวมราคาทั้งหมด</span>
+                <span><span id="priceTotal">0.00</span> ฿</span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-5 gap-3">
+            <button class="btn-action btn-back w-100" onclick="window.location.href='customer_order.html'">
+                ย้อนกลับ
+            </button>
+            <button class="btn-action btn-confirm w-100" onclick="submitOrder()">
+                <i class="fas fa-check-circle me-2"></i> ชำระเงิน
+            </button>
+        </div>
+    </div>
+
+    <script>
+    const API_URL = 'http://localhost:3001';
+
+    //  โหลดรายการสินค้าจาก LocalStorage มาแสดงผล
+    function loadCart() {
+        const cart = JSON.parse(localStorage.getItem('customer_cart')) || [];
+        const listContainer = document.getElementById('itemList');
+        let grandTotal = 0;
+        let itemCounts = 0;
+
+        if (cart.length === 0) {
+            listContainer.innerHTML = '<p class="text-center py-4 text-muted">ไม่พบข้อมูลการสั่งซื้อ</p>';
+            document.getElementById('qtyTotal').innerText = 0;
+            document.getElementById('priceTotal').innerText = '0.00';
+            return;
+        }
+
+        listContainer.innerHTML = cart.map((item, index) => {
+            const subTotal = parseFloat(item.price) * parseInt(item.quantity);
+            grandTotal += subTotal;
+            itemCounts += parseInt(item.quantity);
+
+            return `
+            <div class="item-row">
+                <div class="item-info">
+                    <span class="item-name">${item.product_name}</span>
+                    <span class="item-price-qty">${parseFloat(item.price).toFixed(2)} ฿ x ${item.quantity}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="item-total">
+                        ${subTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })} ฿
+                    </div>
+                    <i class="fas fa-trash-alt btn-delete" onclick="removeItem(${index})"></i>
+                </div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('qtyTotal').innerText = itemCounts;
+        document.getElementById('priceTotal').innerText = grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    }
+
+    //  ลบสินค้าออกจากตะกร้า
+    function removeItem(index) {
+        let cart = JSON.parse(localStorage.getItem('customer_cart')) || [];
+        if (confirm('คุณต้องการลบเมนูนี้ใช่หรือไม่?')) {
+            cart.splice(index, 1);
+            localStorage.setItem('customer_cart', JSON.stringify(cart));
+            loadCart(); 
+        }
+    }
+
+    // ✅ฟังก์ชันชำระเงิน: บันทึกข้อมูลและส่งต่อไปหน้าถัดไป
+    function submitOrder() {
+        const cart = JSON.parse(localStorage.getItem('customer_cart')) || [];
+        if (cart.length === 0) {
+            alert('ไม่มีสินค้าในตะกร้า กรุณากลับไปเลือกเมนูอีกครั้ง');
+            window.location.href = 'customer_order.html';
+            return;
+        }
+
+        // เก็บข้อมูลยอดรวมลงใน localStorage ด้วย เผื่อหน้าถัดไปดึงไปใช้ง่ายๆ
+        const total = document.getElementById('priceTotal').innerText.replace(/,/g, '');
+        localStorage.setItem('pending_order_total', total);
+
+        //  ส่งไปหน้าเลือกวิธีชำระเงิน (หรือหน้า QR ตามชื่อไฟล์ของจูน)
+        window.location.href = 'customer_payment.html'; 
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCart);
+</script>
+</body>
+
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สั่งอาหาร - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-orange: #FD7E14;
+            --bg-cream: #FFF8F0;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            font-family: 'Sarabun', sans-serif;
+            padding-bottom: 120px;
+            margin: 0;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #828282;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #userGreeting {
+            display: inline-block;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+
+        .category-nav {
+            background: white;
+            padding: 1px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 40px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* ปรับ Container ของเมนูห้ามตกบรรทัด (แก้ปัญหา Android) */
+        .category-nav .container {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 25px;
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-nav .container::-webkit-scrollbar {
+            display: none; 
+        }
+
+        .nav-link-custom {
+            color: #666;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            position: relative;
+            transition: 0.3s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .nav-link-custom.active {
+            color: var(--primary-orange);
+        }
+
+        .nav-link-custom.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-orange);
+        }
+
+        .product-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            background: white;
+            height: 100%;
+            transition: 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateX(2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .product-img {
+            height: 220px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .price-qty-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100%;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 5px 12px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .qty-btn.plus {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .cart-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: #FFF3E0;
+            border-radius: 12px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        .option-card {
+            border: 2px solid #eee;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .option-card.active {
+            border-color: var(--primary-orange);
+            background: #fffcf9;
+        }
+
+        /*  CSS สำหรับหน้าจอมือถือ / Android */
+        @media (max-width: 480px) {
+            .brand-logo { width: 40px; height: 40px; }
+            .navbar-brand span { font-size: 0.9rem; }
+            
+            /*  แก้ปัญหาเมนูตกบรรทัดใน Android */
+            .category-nav .container { gap: 5px !important; justify-content: space-around !important; }
+            .nav-link-custom { padding: 10px 8px; font-size: 0.8rem; }
+
+            .product-img { height: 140px; }
+            .product-card h6 { font-size: 0.85rem; }
+            .qty-btn { width: 24px; height: 24px; font-size: 12px; }
+            .qty-control { gap: 4px; padding: 3px 8px; }
+            
+            .mobile-grid-item {
+                width: 50% !important;
+                flex: 0 0 50% !important;
+                padding: 6px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-light bg-white px-4 py-3 shadow-sm">
+        <a class="navbar-brand" href="index.html">
+            <img src="Naii.png" class="brand-logo" alt="Logo">
+            <span>Naii Baan Cafe</span>
+        </a>
+        <div class="d-flex align-items-center">
+            <div id="userGreeting" class="me-2 small text-muted fw-bold"></div>
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="logout()" style="font-size: 0.75rem;">ออกจากระบบ</button>
+        </div>
+    </nav>
+
+    <div class="category-nav shadow-sm mb-4">
+        <div class="container">
+            <span class="nav-link-custom" onclick="filterProducts('ขนมหวาน', this)">ขนมหวาน</span>
+            <span class="nav-link-custom" onclick="filterProducts('เครื่องดื่ม', this)">เครื่องดื่ม</span>
+            <span class="nav-link-custom" onclick="filterProducts('โปรโมชั่น', this)">โปรโมชั่น</span>
+            <span class="nav-link-custom" onclick="window.location.href='order_history.html'">ประวัติสั่งซื้อ</span>
+        </div>
+    </div>
+
+    <div id="subFilterBar" class="container mb-4 d-flex justify-content-center" style="display: none;">
+        <div class="dropdown">
+            <button class="btn btn-warning dropdown-toggle rounded-pill px-4 fw-bold text-white shadow-sm" type="button"
+                id="subCatDropdown" data-bs-toggle="dropdown"
+                style="background-color: var(--primary-orange); border:none; min-width: 220px;">
+                <i class="fas fa-filter me-2"></i>ทั้งหมด
+            </button>
+            <ul class="dropdown-menu shadow border-0">
+                <li><a class="dropdown-item py-2 fw-bold" href="#" onclick="filterSubCategory('all', 'ทั้งหมด')">ทั้งหมด</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" onclick="filterSubCategory('กาแฟ', 'กาแฟ')">กาแฟ</a></li>
+                <li><a class="dropdown-item" href="#" onclick="filterSubCategory('นม', 'นม')">นม</a></li>
+                <li><a class="dropdown-item" href="#" onclick="filterSubCategory('สมูทตี้', 'สมูทตี้')">สมูทตี้</a></li>
+                <li><a class="dropdown-item" href="#" onclick="filterSubCategory('โซดา', 'โซดา')">โซดา</a></li>
+                <li><a class="dropdown-item" href="#" onclick="filterSubCategory('มัทฉะ', 'มัทฉะ')">มัทฉะ</a></li>
+                <li><a class="dropdown-item" href="#" onclick="filterSubCategory('ชา', 'ชา')">ชา</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row g-4" id="productDisplay"></div>
+    </div>
+
+    <div class="cart-bar shadow-sm" id="cartBar" style="display: none;" onclick="goToCheckout()">
+        <div class="d-flex align-items-center"><i class="fas fa-shopping-cart me-3 text-orange"></i><span
+                class="fw-bold"><span id="totalItemsText">0</span> รายการ</span></div>
+        <div class="fw-bold fs-5"><span id="totalPrice">0.00</span> ฿</div>
+    </div>
+
+    <div class="modal fade" id="optionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 25px;">
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-4" id="modalProdName">เมนู</h5>
+                    <div id="optionsContainer"></div>
+                    <button class="btn btn-warning w-100 mt-4 rounded-pill fw-bold text-white shadow-sm"
+                        onclick="confirmDrinkOption()">เพิ่มลงรถเข็น</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    const API_URL = 'http://localhost:3001';
+
+    // ✅ ตั้งค่าตัวแปรเริ่มต้น
+    let allProducts = [], cart = {}, tempProduct = null, selectedOpt = { name: '', price: 0 };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) { window.location.href = 'login.html'; return; }
+
+        // แสดงชื่อผู้ใช้
+        const fullName = user.full_name || "";
+        const shortName = fullName.length > 6 ? fullName.substring(0, 6) + "..." : fullName;
+        document.getElementById('userGreeting').innerText = shortName;
+
+        // ✅ 1. ดึงข้อมูลเก่าจาก LocalStorage กลับมาใส่ตัวแปร cart ทันทีเพื่อให้กดต่อได้
+        const savedData = JSON.parse(localStorage.getItem('customer_cart')) || [];
+        cart = {}; 
+        savedData.forEach(item => {
+            let optionPart = "";
+            if (item.product_name.includes('(')) {
+                optionPart = item.product_name.split('(')[1].replace(')', '');
+            }
+            // สร้าง Key ให้ตรงกับที่ระบบใช้ (id_option หรือ id)
+            const key = optionPart ? `${item.product_id}_${optionPart}` : item.product_id.toString();
+
+            cart[key] = {
+                qty: item.quantity,
+                name: item.product_name,
+                price: item.price,
+                option: optionPart,
+                id: item.product_id
+            };
+        });
+
+        await loadProducts();
+        updateCartBar(); // อัปเดตแถบสีส้มทันที
+    });
+
+    async function loadProducts() {
+        try {
+            const res = await fetch(`${API_URL}/products`);
+            allProducts = await res.json();
+            
+            // ตั้งค่าหมวดหมู่เริ่มต้น
+            const tabs = document.querySelectorAll('.nav-link-custom');
+            if (tabs.length > 0) filterProducts('ขนมหวาน', tabs[0]);
+        } catch (e) { console.error("โหลดสินค้าไม่สำเร็จ"); }
+    }
+
+    function filterProducts(cat, el) {
+        document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
+        if (el) el.classList.add('active');
+        
+        const subBar = document.getElementById('subFilterBar');
+        if (cat === 'เครื่องดื่ม') {
+            subBar.style.setProperty('display', 'flex', 'important');
+            filterSubCategory('all', 'ทั้งหมด');
+        } else {
+            subBar.style.setProperty('display', 'none', 'important');
+            renderProducts(allProducts.filter(p => p.category_name === cat && p.stock > 0));
+        }
+    }
+
+    function filterSubCategory(keyword, label) {
+        const dropdownBtn = document.getElementById('subCatDropdown');
+        if (dropdownBtn) dropdownBtn.innerHTML = `<i class="fas fa-filter me-2"></i>${label}`;
+        let list = allProducts.filter(p => p.category_name === 'เครื่องดื่ม' && p.stock > 0);
+        if (keyword !== 'all') list = list.filter(p => p.sub_category === keyword);
+        renderProducts(list);
+    }
+
+    function renderProducts(items) {
+        const container = document.getElementById('productDisplay');
+        if (items.length === 0) { container.innerHTML = '<div class="col-12 text-center py-5">ไม่พบเมนู</div>'; return; }
+        
+        container.innerHTML = items.map(p => {
+            // ✅ 2. คำนวณจำนวนที่กดไว้เพื่อโชว์ตัวเลขที่ปุ่ม + - (รองรับการย้อนกลับ)
+            let totalQty = 0;
+            const pIdStr = p.product_id.toString();
+            Object.keys(cart).forEach(key => { 
+                if (key === pIdStr || key.startsWith(pIdStr + "_")) {
+                    totalQty += cart[key].qty; 
+                }
+            });
+
+            return `
+                <div class="col-6 col-md-4 col-lg-3 mobile-grid-item">
+                    <div class="product-card">
+                        <img src="${API_URL}${p.image}" class="product-img" onerror="this.src='https://via.placeholder.com/200'">
+                        <div class="p-3">
+                            <h6 class="fw-bold text-truncate" style="font-size:0.9rem;">${p.product_name}</h6>
+                            <div class="price-qty-row">
+                                <span class="small fw-bold" style="color:var(--primary-orange)">${parseFloat(p.price).toFixed(2)} ฿</span>
+                                <div class="qty-control">
+                                    <button class="qty-btn" onclick="handleQtyChange(${p.product_id}, -1)">-</button>
+                                    <span class="fw-bold mx-1">${totalQty}</span>
+                                    <button class="qty-btn plus" onclick="handleQtyChange(${p.product_id}, 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function handleQtyChange(id, change) {
+        const p = allProducts.find(x => x.product_id == id);
+        if (!p) return;
+
+        if (change < 0) {
+            const keys = Object.keys(cart).filter(k => k === id.toString() || k.startsWith(id + "_"));
+            if (keys.length > 0) updateCartLogic(keys[keys.length - 1], -1);
+            return;
+        }
+
+        if (p.drink_options) {
+            const isDirectAdd = (p.sub_category === 'สมูทตี้' || p.sub_category === 'โซดา');
+            if (isDirectAdd) {
+                const opt = p.drink_options.split(',')[0];
+                updateCartLogic(`${p.product_id}_${opt}`, 1, `${p.product_name} (${opt})`, parseFloat(p.price), opt, p.product_id);
+            } else {
+                tempProduct = p;
+                showOptionModal(p);
+            }
+        } else { 
+            updateCartLogic(id.toString(), 1, p.product_name, p.price, '', p.product_id); 
+        }
+    }
+
+    function showOptionModal(p) {
+        document.getElementById('modalProdName').innerText = p.product_name;
+        const available = p.drink_options.split(',');
+        const templates = [
+            { id: 'S', name: 'Size S', price: 0 }, { id: 'M', name: 'Size M', price: 50 }, 
+            { id: 'ร้อน', name: 'ร้อน', price: 0 }, { id: 'เย็น', name: 'เย็น', price: 10 }, { id: 'ปั่น', name: 'ปั่น', price: 15 }
+        ];
+        const filtered = templates.filter(t => available.includes(t.id));
+        
+        document.getElementById('optionsContainer').innerHTML = filtered.map((opt, idx) => `
+            <div class="option-card ${idx === 0 ? 'active' : ''}" onclick="selectOpt('${opt.name}', ${opt.price}, this)">
+                <span>${opt.name}</span><span>${opt.price > 0 ? '+ ' + opt.price + ' ฿' : 'ปกติ'}</span>
+            </div>`).join('');
+        
+        selectedOpt = { name: filtered[0].name, price: filtered[0].price };
+        
+        // ✅ ป้องกัน Error bootstrap is not defined โดยตรวจสอบก่อนเรียก
+        const modalEl = document.getElementById('optionModal');
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+    }
+
+    function selectOpt(name, price, el) {
+        selectedOpt = { name: name, price: price };
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function confirmDrinkOption() {
+        const finalPrice = parseFloat(tempProduct.price) + selectedOpt.price;
+        const fullName = `${tempProduct.product_name} (${selectedOpt.name})`;
+        updateCartLogic(`${tempProduct.product_id}_${selectedOpt.name}`, 1, fullName, finalPrice, selectedOpt.name, tempProduct.product_id);
+        
+        const modalEl = document.getElementById('optionModal');
+        bootstrap.Modal.getInstance(modalEl).hide();
+    }
+
+    function updateCartLogic(key, change, name, price, opt, originalId) {
+        const k = key.toString();
+        if (!cart[k]) cart[k] = { qty: 0, name: name, price: price, option: opt, id: originalId };
+        cart[k].qty += change;
+        if (cart[k].qty <= 0) delete cart[k];
+        
+        // ✅ 3. เซฟลงเครื่องทันทีเพื่อให้กดย้อนกลับแล้วข้อมูลไม่หายและกดต่อเนื่องได้
+        saveToLocalStorage();
+
+        // รีเฟรชหน้าจอตามหมวดที่เปิดอยู่
+        const activeTab = document.querySelector('.nav-link-custom.active').innerText.trim();
+        if (activeTab === 'เครื่องดื่ม') {
+            const label = document.getElementById('subCatDropdown').innerText.replace(' ทั้งหมด', '').trim();
+            filterSubCategory(label === 'ทั้งหมด' ? 'all' : label, label);
+        } else {
+            renderProducts(allProducts.filter(p => p.category_name === activeTab && p.stock > 0));
+        }
+        updateCartBar();
+    }
+
+    function saveToLocalStorage() {
+        const items = Object.values(cart).map(d => ({ 
+            product_id: d.id, product_name: d.name, quantity: d.qty, price: d.price 
+        }));
+        localStorage.setItem('customer_cart', JSON.stringify(items));
+    }
+
+    function updateCartBar() {
+        let count = 0, total = 0;
+        Object.values(cart).forEach(item => { count += item.qty; total += (item.price * item.qty); });
+        const bar = document.getElementById('cartBar');
+        if (bar) {
+            bar.style.display = count > 0 ? 'flex' : 'none';
+            document.getElementById('totalItemsText').innerText = count;
+            document.getElementById('totalPrice').innerText = total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        }
+    }
+
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    function goToCheckout() { window.location.href = 'customer_checkout.html'; }
+</script>
+</body>
+
+</html>

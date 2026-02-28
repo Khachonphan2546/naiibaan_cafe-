@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกวิธีการชำระเงิน - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root { 
+            --primary-orange: #FD7E14; 
+            --bg-cream: #FFF8F0; 
+            --btn-red: #990000; 
+            --btn-green: #008000; 
+        }
+        body { background-color: var(--bg-cream); font-family: 'Sarabun', sans-serif; padding: 50px 20px; color: #333; }
+        
+        .payment-card { 
+            max-width: 480px; margin: auto; background: white; border-radius: 24px; 
+            padding: 35px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;
+        }
+        
+        .header-title { font-weight: 700; font-size: 1.3rem; margin-bottom: 35px; text-align: center; color: #444; }
+
+        .pay-option {
+            background: #fff; border: 2px solid #f5f5f5; border-radius: 18px; padding: 20px;
+            margin-bottom: 16px; cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .pay-option:hover { border-color: #eee; transform: translateY(-1px); }
+        .pay-option.active { border-color: var(--primary-orange); background-color: #fffcf9; }
+
+        .method-box { display: flex; align-items: center; gap: 18px; }
+        
+        .icon-container {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 24px;
+        }
+        .bg-qr { background-color: #e3f2fd; color: #1976d2; }
+        .bg-cash { background-color: #e8f5e9; color: #2e7d32; }
+
+        .method-name { font-weight: 600; font-size: 1.05rem; color: #444; }
+        
+        .check-indicator { 
+            width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 50%; 
+            position: relative; transition: 0.2s;
+        }
+        .pay-option.active .check-indicator { border-color: var(--primary-orange); background: var(--primary-orange); }
+        .pay-option.active .check-indicator::after {
+            content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            color: white; font-size: 10px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+
+        .summary-box {
+            background: #fafafa; border-radius: 18px; padding: 22px; margin-top: 35px;
+            border: 1px dashed #e0e0e0;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: #666; }
+        .total-row { 
+            border-top: 1px solid #eee; padding-top: 15px; margin-top: 10px;
+            font-size: 1.5rem; font-weight: 700; color: var(--primary-orange);
+        }
+
+        .footer-btns { display: flex; gap: 15px; margin-top: 35px; }
+        .btn-p { 
+            flex: 1; border: none; border-radius: 14px; padding: 14px; 
+            font-weight: 700; transition: 0.3s; font-size: 1rem;
+        }
+        .btn-back { background: var(--btn-red); color: white; } 
+        .btn-confirm { background: var(--btn-green); color: white; } 
+        
+        .btn-p:hover { opacity: 0.9; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <div class="payment-card">
+        <h5 class="header-title">เลือกวิธีการชำระเงิน</h5>
+
+        <div class="pay-option shadow-sm" onclick="selectMethod('PromptPay', this)">
+            <div class="method-box">
+                <div class="icon-container bg-qr">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <span class="method-name">QR พร้อมเพย์</span>
+            </div>
+            <div class="check-indicator"></div>
+        </div>
+
+        <div class="pay-option shadow-sm" onclick="selectMethod('Cash', this)">
+            <div class="method-box">
+                <div class="icon-container bg-cash">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <span class="method-name">เงินสด</span>
+            </div>
+            <div class="check-indicator"></div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-row">
+                <span>จำนวนรายการทั้งหมด</span>
+                <span id="qtyVal">0 รายการ</span>
+            </div>
+            <div class="summary-row total-row">
+                <span style="color: #444; font-size: 1rem;">รวมราคาทั้งหมด</span>
+                <span><span id="priceVal">0.00</span> ฿</span>
+            </div>
+        </div>
+
+        <div class="footer-btns">
+            <button class="btn-p btn-back" onclick="window.location.href='customer_checkout.html'">ย้อนกลับ</button>
+            <button class="btn-p btn-confirm" onclick="finishOrder()">ชำระเงิน <i class="fas fa-check-circle ms-1"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        let payMethod = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = JSON.parse(localStorage.getItem('customer_cart')) || [];
+            let total = 0, qty = 0;
+            
+            cart.forEach(item => {
+                const p = parseFloat(item.price || 0);
+                const q = parseInt(item.quantity || item.qty || 0);
+                total += (p * q);
+                qty += q;
+            });
+
+            document.getElementById('qtyVal').innerText = `${qty} รายการ`;
+            document.getElementById('priceVal').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
+        });
+
+        function selectMethod(m, el) {
+            payMethod = m;
+            document.querySelectorAll('.pay-option').forEach(opt => opt.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        async function finishOrder() {
+    if (!payMethod) return alert('กรุณาเลือกวิธีการชำระเงินก่อนครับ');
+    
+    const cartData = JSON.parse(localStorage.getItem('customer_cart')) || [];
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const formattedItems = cartData.map(item => ({
+        product_id: parseInt(item.product_id || item.id),
+        product_name: item.product_name || item.name,
+        quantity: parseInt(item.quantity || item.qty),
+        price: parseFloat(item.price)
+    }));
+
+    try {
+        const res = await fetch(`${API_URL}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: user ? user.user_id : null,
+                items: formattedItems,
+                total_price: parseFloat(document.getElementById('priceVal').innerText.replace(/,/g, '')),
+                payment_method: payMethod,
+                status: 'Pending'
+            })
+        });
+
+        if (res.ok) {
+    
+            alert('สั่งซื้อสำเร็จ!');
+            
+            if (payMethod === 'PromptPay') {
+                window.location.href = 'customer_promptpay.html';
+            } else {
+                
+                localStorage.removeItem('customer_cart');
+                window.location.href = 'customer_how_to.html';
+            }
+        } else {
+            const errorData = await res.json();
+            alert('เกิดข้อผิดพลาด: ' + (errorData.message || 'Error 500'));
+        }
+    } catch (e) { 
+        console.error("Payment Error:", e);
+        alert('การเชื่อมต่อ Server ล้มเหลว'); 
+    }
+}
+    </script>
+</body>
+</html>

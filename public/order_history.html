@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการสั่งซื้อ - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-orange: #FD7E14;
+            --bg-cream: #FFF8F0;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            font-family: 'Sarabun', sans-serif;
+            padding-bottom: 120px;
+            margin: 0;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #828282;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* จัดการชื่อผู้ใช้ใน Navbar สำหรับ Android จอแคบ */
+        #userGreeting {
+            display: inline-block;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+
+        .category-nav {
+            background: white;
+            padding: 1px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 40px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* ปรับ Container ของเมนูห้ามตกบรรทัด (แก้ปัญหา Android) */
+        .category-nav .container {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 25px;
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-nav .container::-webkit-scrollbar {
+            display: none; 
+        }
+
+        .nav-link-custom {
+            color: #666;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            position: relative;
+            transition: 0.3s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .nav-link-custom.active {
+            color: var(--primary-orange);
+        }
+
+        .nav-link-custom.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-orange);
+        }
+
+        .history-wrapper {
+            max-width: 950px;
+            margin: auto;
+            padding: 0 15px;
+        }
+
+        .order-card-white {
+            background: white;
+            border-radius: 25px;
+            padding: 35px 45px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.01);
+            transition: 0.3s;
+        }
+
+        .order-main-layout {
+            display: flex;
+            justify-content: space-between;
+            gap: 50px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .order-left-column { flex: 1; }
+        .order-right-column { flex: 1.3; }
+
+        .order-id-txt { font-weight: 700; color: #333; font-size: 1.1rem; margin-bottom: 4px; }
+        .order-date-txt { color: #888; font-size: 0.8rem; }
+
+        .food-row-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #555;
+            padding: 6px 0;
+            border-bottom: 1px dashed #f5f5f5;
+        }
+
+        .total-price-display { color: var(--primary-orange); font-weight: 700; font-size: 1.2rem; }
+        .total-label-txt { font-size: 0.85rem; color: #999; font-weight: 600; }
+
+        /* แก้ไขสำหรับ Mobile / Android โดยเฉพาะ */
+        @media (max-width: 480px) {
+            .brand-logo { width: 40px; height: 40px; }
+            .navbar-brand span { font-size: 0.9rem; }
+            
+            /* ลด Gap และขนาดฟอนต์เมนู เพื่อให้ Android แสดงผลบรรทัดเดียวได้พอดี */
+            .category-nav .container { 
+                gap: 5px !important; 
+                justify-content: space-evenly !important;
+            }
+            .nav-link-custom { 
+                padding: 10px 8px; 
+                font-size: 0.8rem; 
+            }
+
+            .order-card-white { padding: 20px; }
+            .order-main-layout { 
+                flex-direction: column; 
+                gap: 15px; 
+            }
+            .order-right-column { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-light bg-white px-4 py-3 shadow-sm">
+        <a class="navbar-brand" href="index.html">
+            <img src="Naii.png" class="brand-logo" alt="Naii Baan Logo">
+            <span>Naii Baan Cafe</span>
+        </a>
+        <div class="d-flex align-items-center">
+            <div id="userGreeting" class="me-2 small text-muted fw-bold"></div>
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="logout()" style="font-size: 0.75rem;">ออกจากระบบ</button>
+        </div>
+    </nav>
+
+    <div class="category-nav shadow-sm mb-4">
+        <div class="container">
+            <span class="nav-link-custom" onclick="window.location.href='customer_order.html?cat=ขนมหวาน'">ขนมหวาน</span>
+            <span class="nav-link-custom" onclick="window.location.href='customer_order.html?cat=เครื่องดื่ม'">เครื่องดื่ม</span>
+            <span class="nav-link-custom" onclick="window.location.href='customer_order.html?cat=โปรโมชั่น'">โปรโมชั่น</span>
+            <span class="nav-link-custom active">ประวัติสั่งซื้อ</span>
+        </div>
+    </div>
+
+    <div class="history-wrapper">
+        <div id="historyDisplayArea">
+            <div class="text-center py-5">
+                <div class="spinner-border text-warning"></div>
+                <p class="mt-2 text-muted">กำลังดึงข้อมูลประวัติ...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       const API_URL = 'http://localhost:3001';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) { window.location.href = 'login.html'; return; }
+
+            // ตัดชื่อเหลือ 6 ตัวอักษร
+            const fullName = user.full_name || "";
+            const shortName = fullName.length > 6 ? fullName.substring(0, 6) + "..." : fullName;
+            document.getElementById('userGreeting').innerText = shortName;
+
+            try {
+                const response = await fetch(`${API_URL}/api/orders/customer/${user.user_id}`);
+                const orders = await response.json();
+                const container = document.getElementById('historyDisplayArea');
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `<div class="text-center py-5 text-muted small">ยังไม่มีประวัติการสั่งซื้อ</div>`;
+                    return;
+                }
+
+                container.innerHTML = orders.map(order => {
+                    const itemsHtml = order.items && order.items.length > 0
+                        ? order.items.map(item => `
+                            <div class="food-row-item">
+                                <span>${item.product_name}</span>
+                                <span class="fw-bold text-dark">x${item.quantity}</span>
+                            </div>
+                        `).join('')
+                        : `<div class="text-muted small">ไม่มีข้อมูลรายการสินค้า</div>`;
+
+                    return `
+                        <div class="order-card-white">
+                            <div class="order-main-layout">
+                                <div class="order-left-column">
+                                    <div class="order-id-txt">ออเดอร์ #${order.order_id}</div>
+                                    <div class="order-date-txt">
+                                        ${new Date(order.created_at).toLocaleString('th-TH')}
+                                    </div>
+                                </div>
+
+                                <div class="order-right-column">
+                                    ${itemsHtml}
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-1">
+                                <span class="total-label-txt">ยอดสุทธิรวมทั้งสิ้น</span>
+                                <span class="total-price-display">${parseFloat(order.total_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} ฿</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('historyDisplayArea').innerHTML = `<div class="text-center py-5 text-danger small">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+            }
+        });
+
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการสินค้า - Naii Baan ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-orange: #FD7E14;
+            --bg-cream: #FFF8F0;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #828282;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #333;
+        }
+
+        .nav-link-custom {
+            text-decoration: none;
+            color: #666;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .nav-link-custom.active {
+            color: var(--primary-orange);
+            background: #FFF3E0;
+        }
+
+        .admin-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .product-table-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-add {
+            background: var(--primary-orange);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0 20px;
+            height: 45px;
+            font-weight: 700;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-add:hover {
+            background: #e36802;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .product-img-table {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fafafa;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .search-input-group {
+            position: relative;
+            width: 250px;
+        }
+
+        .search-input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .search-input-group input {
+            padding-left: 40px;
+            border-radius: 12px;
+            height: 45px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="top-navbar d-flex justify-content-between align-items-center">
+        <a href="admin_dashboard.html" class="brand-section">
+            <img src="Naii.png" class="brand-logo" alt="Logo">
+            <span class="brand-name">Naii Baan ADMIN</span>
+        </a>
+        <div class="d-flex gap-3 align-items-center">
+            <a href="admin_user.html" class="nav-link-custom"><i class="fas fa-user-shield"></i> จัดการผู้ใช้ระบบ</a>
+            <a href="admin_product.html" class="nav-link-custom active"><i class="fas fa-box"></i> รายการสินค้า</a>
+            <a href="admin_dashboard.html" class="nav-link-custom"><i class="fas fa-chart-line"></i> รายการยอดขาย</a>
+            <a href="#" onclick="localStorage.clear(); window.location.href='login.html';"
+                class="nav-link-custom text-danger"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">จัดการเมนู / สินค้า</h2>
+            </div>
+            <div class="action-group d-flex gap-2">
+                <div class="search-input-group shadow-sm">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาชื่อเมนู..." onkeyup="filterProducts()">
+                </div>
+                
+                <select id="categoryFilter" class="form-select shadow-sm" style="border-radius: 12px; width: 180px;"
+                    onchange="filterProducts()">
+                    <option value="all">แสดงทั้งหมด...</option>
+                    <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                    <option value="ขนมหวาน">ขนมหวาน</option>
+                    <option value="โปรโมชั่น">โปรโมชั่น</option>
+                </select>
+                <button class="btn-add shadow-sm" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> เพิ่มเมนูใหม่
+                </button>
+            </div>
+        </div>
+
+        <div class="product-table-card">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr class="text-muted" style="font-size: 0.9rem;">
+                            <th class="py-3">รูป</th>
+                            <th class="py-3">รหัส</th>
+                            <th class="py-3">ชื่อรายการ</th>
+                            <th class="py-3">ราคาเริ่มต้น</th>
+                            <th class="py-3">หมวดหมู่</th>
+                            <th class="py-3">สถานะ</th>
+                            <th class="py-3 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold" id="modalTitle">ข้อมูลเมนู</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="productForm">
+                        <input type="hidden" id="editId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ประเภทสินค้า</label>
+                                <select class="form-select border-0 bg-light" id="pCategory" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ชื่อรายการ</label>
+                                <input type="text" class="form-control border-0 bg-light" id="pName" required>
+                            </div>
+
+                            <div class="col-12" id="subCategoryArea" style="display: none;">
+                                <label class="form-label fw-bold">หมวดหมู่ย่อย (สำหรับเครื่องดื่ม)</label>
+                                <select class="form-select border-0 bg-light" id="pSubCategory">
+                                    <option value="">-- เลือกหมวดหมู่ย่อย --</option>
+                                    <option value="กาแฟ">กาแฟ</option>
+                                    <option value="นม">นม</option>
+                                    <option value="สมูทตี้">สมูทตี้ (ปั่น)</option>
+                                    <option value="โซดา">โซดา</option>
+                                    <option value="มัทฉะ">มัทฉะ</option>
+                                    <option value="ชา">ชา</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ราคาเริ่มต้น (บาท)</label>
+                                <input type="number" class="form-control border-0 bg-light" id="pPrice" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">สถานะ</label>
+                                <select class="form-select border-0 bg-light" id="pStatus" required>
+                                    <option value="1">พร้อมขาย</option>
+                                    <option value="0">ไม่พร้อมขาย</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12" id="drinkOptionsArea" style="display: none;">
+                                <label class="form-label fw-bold">ตัวเลือกที่อนุญาต (เครื่องดื่ม)</label>
+                                <div class="d-flex gap-4 p-3 bg-light rounded-3">
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" id="opt_hot" value="ร้อน"><label class="form-check-label"> ร้อน (ฟรี)</label></div>
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" id="opt_iced" value="เย็น"><label class="form-check-label">เย็น (+10฿)</label></div>
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" id="opt_frappe" value="ปั่น"><label class="form-check-label"> ปั่น (+15฿)</label></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12" id="dessertOptionsArea" style="display: none;">
+                                <label class="form-label fw-bold">ขนาดที่อนุญาต (ขนมหวาน)</label>
+                                <div class="d-flex gap-4 p-3 bg-light rounded-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="size_s" value="S">
+                                        <label class="form-check-label"> Size S (ปกติ)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="size_m" value="M">
+                                        <label class="form-check-label"> Size M (+50฿)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold">รูปสินค้า</label>
+                                <input type="file" class="form-control d-none" id="pImage" accept="image/*" onchange="previewImage(event)">
+                                <div class="image-upload-area" onclick="document.getElementById('pImage').click()">
+                                    <div class="text-center text-muted" id="placeholderText">
+                                        <i class="fas fa-cloud-upload-alt fs-1 mb-2 text-warning"></i><br>คลิกเพื่ออัปโหลดรูปภาพ
+                                    </div>
+                                    <img id="previewImg" class="preview-img">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-5" style="background-color: var(--primary-orange); border:none;" onclick="saveProduct()">บันทึกข้อมูล</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3001';
+        let productModal;
+        let allProductsRaw = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            productModal = new bootstrap.Modal(document.getElementById('productModal'));
+            loadCategories();
+            loadProducts();
+
+            document.getElementById('pCategory').addEventListener('change', function () {
+                const text = this.options[this.selectedIndex]?.text || "";
+                const isDrink = text === 'เครื่องดื่ม';
+                const isDessert = text === 'ขนมหวาน';
+
+                document.getElementById('drinkOptionsArea').style.display = isDrink ? 'block' : 'none';
+                document.getElementById('subCategoryArea').style.display = isDrink ? 'block' : 'none';
+                document.getElementById('dessertOptionsArea').style.display = isDessert ? 'block' : 'none';
+            });
+        });
+
+        async function loadProducts() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                allProductsRaw = await res.json();
+                displayProducts(allProductsRaw);
+            } catch (err) { console.error(err); }
+        }
+
+        function displayProducts(products) {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td><img src="${p.image ? API_URL + p.image : 'https://via.placeholder.com/50'}" class="product-img-table shadow-sm"></td>
+                    <td class="text-primary fw-bold">${p.product_code || '-'}</td>
+                    <td class="fw-bold">${p.product_name}</td>
+                    <td class="fw-bold">฿${parseFloat(p.price).toLocaleString()}</td>
+                    <td><span class="badge bg-warning text-dark px-3 rounded-pill">${p.category_name || '-'}</span></td>
+                    <td>${p.stock > 0 ? '<span class="badge bg-success bg-opacity-10 text-success px-3">พร้อมขาย</span>' : '<span class="badge bg-secondary bg-opacity-10 text-secondary px-3">ไม่พร้อมขาย</span>'}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-light text-warning me-1" onclick="editProduct(${p.product_id}, '${p.product_name}', ${p.price}, ${p.stock}, ${p.category_id}, '${p.image}', '${p.product_code}', '${p.drink_options || ''}', '${p.sub_category || ''}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light text-danger" onclick="deleteProduct(${p.product_id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        //  รวมฟังก์ชันค้นหาและกรองหมวดหมู่เข้าด้วยกัน
+        function filterProducts() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const selectedCat = document.getElementById('categoryFilter').value;
+
+            const filtered = allProductsRaw.filter(p => {
+                const matchSearch = p.product_name.toLowerCase().includes(searchText);
+                const matchCategory = (selectedCat === 'all' || p.category_name === selectedCat);
+                return matchSearch && matchCategory;
+            });
+
+            displayProducts(filtered);
+        }
+
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${API_URL}/categories`);
+                const data = await res.json();
+                const mainCats = ['เครื่องดื่ม', 'ขนมหวาน', 'โปรโมชั่น'];
+                document.getElementById('pCategory').innerHTML = '<option value="">เลือกประเภท...</option>' +
+                    data.filter(c => mainCats.includes(c.category_name)).map(c => `<option value="${c.category_id}">${c.category_name}</option>`).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        function openAddModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('previewImg').style.display = 'none';
+            document.getElementById('placeholderText').style.display = 'block';
+            document.getElementById('pCategory').dispatchEvent(new Event('change'));
+            productModal.show();
+        }
+
+        function editProduct(id, name, price, stock, catId, image, code, options, subCat) {
+            document.getElementById('editId').value = id;
+            document.getElementById('pName').value = name;
+            document.getElementById('pPrice').value = price;
+            document.getElementById('pStatus').value = stock > 0 ? '1' : '0';
+            document.getElementById('pCategory').value = catId;
+            document.getElementById('pSubCategory').value = subCat || '';
+
+            document.getElementById('pCategory').dispatchEvent(new Event('change'));
+
+            const optsArray = options ? options.split(',') : [];
+            document.querySelectorAll('.form-check-input').forEach(input => input.checked = false);
+
+            if(document.getElementById('opt_hot')) document.getElementById('opt_hot').checked = optsArray.includes('ร้อน');
+            if(document.getElementById('opt_iced')) document.getElementById('opt_iced').checked = optsArray.includes('เย็น');
+            if(document.getElementById('opt_frappe')) document.getElementById('opt_frappe').checked = optsArray.includes('ปั่น');
+            if(document.getElementById('size_s')) document.getElementById('size_s').checked = optsArray.includes('S');
+            if(document.getElementById('size_m')) document.getElementById('size_m').checked = optsArray.includes('M');
+
+            if (image) {
+                document.getElementById('previewImg').src = API_URL + image;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('placeholderText').style.display = 'none';
+            }
+            productModal.show();
+        }
+
+        async function saveProduct() {
+            const formData = new FormData();
+            formData.append('product_name', document.getElementById('pName').value);
+            formData.append('price', document.getElementById('pPrice').value);
+            formData.append('stock', document.getElementById('pStatus').value === '1' ? 999 : 0);
+            formData.append('category_id', document.getElementById('pCategory').value);
+            formData.append('sub_category', document.getElementById('pSubCategory').value);
+
+            let opts = [];
+            const catSelect = document.getElementById('pCategory');
+            const catText = catSelect.options[catSelect.selectedIndex].text;
+
+            if (catText === 'เครื่องดื่ม') {
+                if (document.getElementById('opt_hot').checked) opts.push('ร้อน');
+                if (document.getElementById('opt_iced').checked) opts.push('เย็น');
+                if (document.getElementById('opt_frappe').checked) opts.push('ปั่น');
+            } else if (catText === 'ขนมหวาน') {
+                if (document.getElementById('size_s').checked) opts.push('S');
+                if (document.getElementById('size_m').checked) opts.push('M');
+            }
+            formData.append('drink_options', opts.join(','));
+
+            const fileInput = document.getElementById('pImage');
+            if (fileInput.files[0]) formData.append('imageFile', fileInput.files[0]);
+
+            const id = document.getElementById('editId').value;
+            const res = await fetch(id ? `${API_URL}/api/products/${id}` : `${API_URL}/api/products`, {
+                method: id ? 'PUT' : 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                alert('บันทึกสำเร็จ! ✅');
+                productModal.hide();
+                loadProducts();
+            } else { alert('ล้มเหลว'); }
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('ลบเมนูนี้?')) {
+                const res = await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE' });
+                if (res.ok) loadProducts();
+            }
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById('previewImg').src = reader.result;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('placeholderText').style.display = 'none';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+
+</html>

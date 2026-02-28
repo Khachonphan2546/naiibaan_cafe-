@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naii Baan Cafe - หน้าหลัก</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-orange: #FD7E14;
+            --bg-cream: #FFF8F0;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-cream);
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-icon {
+            background: var(--primary-orange);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-section { padding: 30px 0; }
+
+        .store-img {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        #orderShortcut { display: none; margin-bottom: 40px; }
+
+        .shortcut-card {
+            background: #FFF3E0;
+            border-radius: 25px;
+            padding: 40px;
+            border: 2px dashed var(--primary-orange);
+            transition: 0.3s;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            height: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .map-container {
+            border-radius: 15px;
+            overflow: hidden;
+            height: 220px;
+            border: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+
+        .step-container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 70px;
+            height: 70px;
+            background: white;
+            color: var(--primary-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 25px;
+            border: 4px solid #FFF3E0;
+            box-shadow: 0 8px 15px rgba(253, 126, 20, 0.1);
+        }
+
+        .step-line {
+            position: absolute;
+            top: 75px;
+            left: 15%;
+            width: 70%;
+            height: 2px;
+            border-top: 2px dashed #FFD580;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        .category-pill {
+            display: inline-block;
+            cursor: pointer;
+            padding: 10px 28px;
+            border-radius: 50px;
+            background: white;
+            border: 1px solid #eee;
+            margin: 5px;
+            font-weight: 600;
+            color: #666;
+            transition: 0.3s;
+        }
+
+        .category-pill.active {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+        }
+
+        .product-card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+            transition: 0.3s;
+            height: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .product-img-card {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .best-seller-tag {
+            font-size: 0.75rem;
+            color: var(--primary-orange);
+            font-weight: 700;
+        }
+
+        .scroll-item {
+            flex: 0 0 300px;
+            max-width: 200px;
+            display: flex;
+        }
+
+        .scroll-item .product-card { width: 100%; height: 100%; display: flex; flex-direction: column; }
+
+        /* ✅ CSS ปรับปรุงพิเศษสำหรับหน้าจอมือถือ (480px) */
+        @media (max-width: 480px) {
+            .container { padding-left: 15px; padding-right: 15px; }
+            .hero-section { padding: 10px 0; }
+            .store-img { height: 200px; border-radius: 15px; }
+
+            .info-card, .step-container { padding: 20px 15px; border-radius: 20px; }
+            .step-icon { width: 50px; height: 50px; font-size: 18px; margin-bottom: 10px; }
+            .step-line { top: 52px; width: 60%; left: 20%; }
+            .step-item h6 { font-size: 11px !important; }
+            .step-item p { font-size: 9px !important; line-height: 1.2; }
+
+            .scroll-item { flex: 0 0 250px; max-width: 300px; }
+            .scroll-item .product-img-card { height: 200px; }
+            .scroll-item h6 { font-size: 12px !important; }
+            .category-pill { padding: 6px 18px; font-size: 15px; }
+
+            /* ปรับ Card เมนูทั้งหมดให้แสดง 2 คอลัมน์พอดีๆ */
+            #allProductList .col-6 { padding: 8px; }
+            .product-card .p-3 { padding: 10px !important; }
+            .product-card h6 { font-size: 13px !important; margin-bottom: 5px; }
+            .product-card .fw-bold { font-size: 14px; }
+            .btn-orange-circle { width: 26px; height: 26px; }
+            .btn-orange-circle i { font-size: 10px; }
+        }
+
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px 5px 25px 5px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scroll-container::-webkit-scrollbar { height: 4px; }
+        .scroll-container::-webkit-scrollbar-thumb { background: #FFD580; border-radius: 10px; }
+
+        .btn-orange-circle {
+            background: var(--primary-orange);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        } 
+
+                /* ✅ ส่วนที่เพิ่มเข้าไปใหม่เพื่อปรับความสูงรูปในมือถือ */
+        @media (max-width: 480px) {
+            /* 1. ปรับความสูงรูปในเมนูยอดนิยมประจำร้าน */
+            .scroll-item .product-img-card { 
+                height: 150px !important; /* ปรับให้รูปเมนูยอดนิยมสูงพอดีตา */
+            }
+
+            /* 2. ปรับความสูงรูปในเมนูทั้งหมดของร้าน */
+            #allProductList .product-img-card {
+                height: 140px !important; /* ปรับรูปเมนูทั้งหมดให้ไม่ยาวจนเกินไปในหน้าจอ 2 คอลัมน์ */
+                object-fit: cover;
+            }
+        }
+
+                /* ✅ เพิ่มการปรับขนาดตัวหนังสือสำหรับมือถือ 480px */
+        @media (max-width: 480px) {
+            /* 1. ส่วนหัวข้อเมนูยอดนิยม และเมนูทั้งหมด */
+            h4 { 
+                font-size: 1.2rem !important; 
+                margin-top: 30px !important; 
+                margin-bottom: 20px !important; 
+            }
+
+            /* 2. ส่วนการ์ด "หิวแล้วหรือยัง?" */
+            .shortcut-card h3 { 
+                font-size: 1.2rem !important; 
+            }
+            .shortcut-card p { 
+                font-size: 0.9rem !important; 
+            }
+            .shortcut-card .btn-lg { 
+                font-size: 0.9rem !important; 
+                padding: 12px 30px !important; 
+            }
+
+            /* 3. ชื่อเมนูในการ์ด (ยอดนิยม และ ทั้งหมด) */
+            .product-card h6 { 
+                font-size: 12px !important; 
+                line-height: 1.3;
+            }
+            
+            /* 4. ราคาและสถิติการสั่ง */
+            .product-card p, .product-card span { 
+                font-size: 11px !important; 
+            }
+
+            /* 5. ปุ่ม View All / Show Less */
+            #viewAllContainer button {
+                font-size: 12px !important;
+                padding: 8px 25px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top bg-white shadow-sm py-2">
+        <div class="container d-flex align-items-center justify-content-between flex-nowrap" style="max-width: 1350px">
+            <a class="navbar-brand d-flex align-items-center m-0" href="index.html">
+                <img src="Naii.png" width="50" height="50" class="rounded-circle border" onerror="this.src='https://cdn-icons-png.flaticon.com/512/924/924514.png'">
+                <span class="fw-bold text-dark ms-2" style="font-size: 1.1rem; white-space: nowrap;">Naii Baan Cafe</span>
+            </a>
+            <div class="d-flex align-items-center gap-2" id="authSection">
+                <a href="login.html" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-sm btn-warning text-white rounded-pill px-3 fw-bold shadow-sm">สมัครสมาชิก</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero-section text-center">
+            <img src="Naii Baan Cafe.jpg" class="store-img" alt="บรรยากาศร้าน">
+        </section>
+
+        <section id="orderShortcut">
+            <div class="shortcut-card text-center mt-2">
+                <h3 class="fw-bold mb-3">หิวแล้วหรือยัง? 😋</h3>
+                <p class="text-muted mb-4 fs-5">เลือกดูเมนูอร่อยๆ และสั่งอาหารได้ทันทีผ่านระบบออนไลน์</p>
+                <a href="customer_order.html" class="btn btn-warning btn-lg px-5 rounded-pill fw-bold text-white shadow-lg py-3">
+                    <i class="fas fa-utensils me-2"></i> เริ่มสั่งออเดอร์ของคุณ
+                </a>
+            </div>
+        </section>
+
+        <section class="mb-5 mt-4">
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <div class="info-card shadow-sm">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-map-marker-alt text-danger me-2"></i>ที่ตั้งร้าน</h5>
+                        <div class="map-container mb-3">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3870.767980387532!2d100.71836597589635!3d14.031238490715392!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x311d7974f8970855%3A0xc6551a4a17ab301d!2z4LiZ4Lix4LiiIOC4muC5ieC4p-C4mSDguITguLLguYDguI_guYg!5e0!3m2!1sth!2sth!4v1715764000000!5m2!1sth!2sth" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                        <a href="https://maps.app.goo.gl/ZQr6JzLnbAfnUW7g7" target="_blank" class="btn btn-sm btn-outline-warning w-100 rounded-pill fw-bold">
+                            <i class="fas fa-directions me-1"></i> ดูเส้นทาง
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="step-container shadow-sm h-100 text-center">
+                        <h5 class="fw-bold mb-5">ขั้นตอนการใช้บริการง่ายๆ </h5>
+                        <div class="row position-relative">
+                            <div class="step-line d-none d-md-block"></div>
+                            <div class="col-4 step-item">
+                                <div class="step-icon"><i class="fas fa-utensils"></i></div>
+                                <h6 class="fw-bold small">1.เลือกเมนู</h6>
+                                <p class="x-small text-muted">เลือกเมนูที่ชอบ<br>และชำระเงิน</p>
+                            </div>
+
+                            <div class="col-4 step-item">
+                                <div class="step-icon"><i class="fas fa-wallet"></i></div>
+                                <h6 class="fw-bold small">2.ชำระเงิน</h6>
+                                <p class="x-small text-muted">แจ้งชำระเงิน<br>ที่หน้าเคาน์เตอร์</p>
+                            </div>
+
+                            <div class="col-4 step-item">
+                                <div class="step-icon"><i class="fas fa-smile-beam"></i></div>
+                                <h6 class="fw-bold small">3.รับสินค้า</h6>
+                                <p class="x-small text-muted">พร้อมรับ<br>ความอร่อย</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <h4 class="fw-bold text-center" style="margin-bottom: 30px; margin-top: 60px;">เมนูยอดนิยมประจำร้าน 🔥</h4>
+        <div class="scroll-container" id="productList"></div>
+
+        <div id="fullMenuSection">
+            <h4 class="fw-bold text-center" style="margin-top: 40px;">เมนูทั้งหมดของร้าน</h4>
+            <div class="category-scroll mb-4 text-center mt-4" id="allCategoryList"></div>
+            <div class="row g-4 mb-4" id="allProductList"></div>
+            <div class="text-center mb-5" id="viewAllContainer" style="display: none;">
+                <button class="btn btn-outline-warning rounded-pill px-5 py-2 fw-bold shadow-sm" onclick="showMoreProducts()">
+                    View All <i class="fas fa-chevron-down ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3001';
+        let salesRanking = {};
+        let fullProductList = [];
+        let currentDisplayLimit = 4;
+        let currentCategoryProducts = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            checkAuth();
+            await calculateMonthlySales();
+            await loadTrendingProducts();
+            await loadAllShopCategories();
+            await loadAllShopProducts();
+        });
+
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const authSection = document.getElementById('authSection');
+            const orderShortcut = document.getElementById('orderShortcut');
+            const fullMenuSection = document.getElementById('fullMenuSection');
+
+            if (user) {
+                // ✅ ถ้าล็อกอินแล้ว ให้ซ่อนส่วนเมนูทั้งหมดออกทันที
+                if (fullMenuSection) fullMenuSection.style.display = 'none';
+
+                if (user.role === 'customer') { orderShortcut.style.display = 'block'; }
+                let manageLink = (user.role === 'owner') ? 'admin_dashboard.html' : (user.role === 'staff') ? 'pos.html' : '';
+                let manageText = (user.role === 'owner') ? 'จัดการร้าน' : (user.role === 'staff') ? 'หน้า POS' : '';
+                authSection.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        ${manageLink ? `<a href="${manageLink}" class="btn btn-sm btn-dark rounded-pill px-3 me-2">${manageText}</a>` : ''}
+                        <div class="dropdown">
+                            <div class="user-icon" data-bs-toggle="dropdown"><i class="fas fa-user"></i></div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 p-2">
+                                <li class="px-3 py-2 border-bottom small fw-bold text-dark">${user.full_name}</li>
+                                <li><a class="dropdown-item rounded-3 py-2 text-danger small" href="#" onclick="logout()">ออกจากระบบ</a></li>
+                            </ul>
+                        </div>
+                    </div>`;
+            } else {
+                // ถ้ายังไม่ล็อกอิน ให้แสดงเมนูทั้งหมด
+                if (fullMenuSection) fullMenuSection.style.display = 'block';
+            }
+        }
+
+        async function calculateMonthlySales() {
+            try {
+                const res = await fetch(`${API_URL}/orders?days=31`);
+                const orders = await res.json();
+                const now = new Date();
+                salesRanking = {};
+                orders.forEach(order => {
+                    const orderDate = new Date(order.created_at);
+                    if (orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
+                        if (order.status !== 'Cancelled' && order.status !== 'ยกเลิก') {
+                            order.items.forEach(item => {
+                                const cleanName = item.product_name.split('(')[0].trim();
+                                salesRanking[cleanName] = (salesRanking[cleanName] || 0) + (parseInt(item.quantity) || 0);
+                            });
+                        }
+                    }
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadTrendingProducts() {
+            try {
+                const resProducts = await fetch(`${API_URL}/products`);
+                const allProducts = await resProducts.json();
+                let trending = allProducts.filter(p => (salesRanking[p.product_name] || 0) > 0);
+                trending.sort((a, b) => (salesRanking[b.product_name] || 0) - (salesRanking[a.product_name] || 0));
+                renderTrending(trending.slice(0, 10));
+            } catch (e) { console.error(e); }
+        }
+
+        function renderTrending(products) {
+            const container = document.getElementById('productList');
+            if (products.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center py-5 text-muted">ยังไม่มียอดสั่งซื้อในเดือนนี้</div>';
+                return;
+            }
+            container.innerHTML = products.map((p, index) => `
+                <div class="scroll-item">
+                    <div class="product-card shadow-sm border-0 h-100">
+                        <div style="position:absolute; top:10px; left:10px; background:var(--primary-orange); color:white; padding:2px 12px; border-radius:12px; font-size:12px; font-weight:bold; z-index:10;">อันดับ ${index + 1}</div>
+                        <img src="${p.image ? API_URL + p.image : 'https://via.placeholder.com/200'}" class="product-img-card">
+                        <div class="p-3">
+                            <span class="best-seller-tag" style="font-size:10px;"><i class="fas fa-calendar-alt"></i> ยอดฮิตเดือนนี้</span>
+                            <h6 class="fw-bold text-truncate mb-1 mt-1">${p.product_name}</h6>
+                            <p class="text-muted small mb-0" style="font-size: 11px;">สั่งไปแล้ว ${salesRanking[p.product_name] || 0} ครั้ง</p>
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        async function loadAllShopCategories() {
+            try {
+                const res = await fetch(`${API_URL}/categories`);
+                const cats = await res.json();
+                const container = document.getElementById('allCategoryList');
+                container.innerHTML = cats.map((c, index) => `
+                    <span class="category-pill ${index === 0 ? 'active' : ''}" onclick="filterAllMenu(${c.category_id}, this)">
+                        ${c.category_name}
+                    </span>`).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadAllShopProducts() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                fullProductList = await res.json();
+                const resCats = await fetch(`${API_URL}/categories`);
+                const cats = await resCats.json();
+                if (cats.length > 0) {
+                    const filtered = fullProductList.filter(p => p.category_id === cats[0].category_id);
+                    renderFullMenu(filtered);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderFullMenu(products) {
+            currentCategoryProducts = products;
+            const container = document.getElementById('allProductList');
+            const btnContainer = document.getElementById('viewAllContainer');
+            const viewAllBtn = btnContainer.querySelector('button');
+
+            if (products.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center py-5 text-muted">ไม่พบสินค้าในหมวดนี้</div>';
+                btnContainer.style.display = 'none';
+                return;
+            }
+
+            const visibleProducts = products.slice(0, currentDisplayLimit);
+            container.innerHTML = visibleProducts.map(p => `
+                <div class="col-6 col-md-3">
+                    <div class="product-card shadow-sm border-0 h-100 text-start">
+                        <img src="${p.image ? API_URL + p.image : 'https://via.placeholder.com/200'}" class="product-img-card" style="height:250px;">
+                        <div class="p-3">
+                            <h6 class="fw-bold mb-1 text-truncate">${p.product_name}</h6>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="fw-bold" style="color:var(--primary-orange);">${p.price} ฿</span>
+                                <button class="btn-orange-circle shadow-sm" onclick="handleShopOrder(${p.product_id})"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            if (products.length > 4) {
+                btnContainer.style.display = 'block';
+                viewAllBtn.innerHTML = currentDisplayLimit >= products.length ? 'Show Less <i class="fas fa-chevron-up ms-2"></i>' : 'View All <i class="fas fa-chevron-down ms-2"></i>';
+            } else { btnContainer.style.display = 'none'; }
+        }
+
+        function showMoreProducts() {
+            currentDisplayLimit = currentDisplayLimit >= currentCategoryProducts.length ? 4 : currentCategoryProducts.length;
+            renderFullMenu(currentCategoryProducts);
+        }
+
+        function filterAllMenu(catId, element) {
+            currentDisplayLimit = 4;
+            document.querySelectorAll('#allCategoryList .category-pill').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            renderFullMenu(fullProductList.filter(p => p.category_id === catId));
+        }
+
+        function handleShopOrder() {
+            window.location.href = 'customer_order.html';
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            Swal.fire({ icon: 'success', title: 'ออกจากระบบเรียบร้อย', showConfirmButton: false, timer: 1500 })
+                .then(() => { window.location.href = 'index.html'; });
+        }
+    </script>
+</body>
+
+</html>

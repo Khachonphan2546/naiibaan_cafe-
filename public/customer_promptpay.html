@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ชำระเงิน QR พร้อมเพย์ - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root { 
+            --primary-blue: #003D6B; 
+            --primary-orange: #FD7E14; 
+            --bg-cream: #FFF8F0; 
+        }
+        body { background-color: var(--bg-cream); font-family: 'Sarabun', sans-serif; padding: 40px 20px; margin: 0; }
+        
+        .payment-card { 
+            max-width: 420px; margin: auto; background: white; border-radius: 25px; 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); text-align: center;
+            border: none;
+        }
+        
+        .qr-header { background: var(--primary-blue); padding: 45px; }
+        .qr-header img { width: 150px; }
+        
+        .qr-section { 
+    padding: 40px 20px 25px; 
+}
+        .pp-logo { width: 100px; margin-bottom: 15px; }
+        
+        .qr-frame { 
+            width: 220px; height: 220px; margin: 15px auto; 
+            border: 2px solid #f8f9fa; padding: 15px; border-radius: 15px;
+            background: #fff;
+        }
+        
+        .timer-info { color: #d9534f; font-weight: 700; margin-top: 20px; font-size: 1.1rem; }
+        
+        .price-box { 
+            background: var(--primary-blue); 
+            color: white; 
+            padding: 15px 25px; 
+            font-size: 1rem; 
+            font-weight: 400;
+        }
+
+        .grand-total { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            display: block; 
+            margin-top: 2px; 
+        }
+
+        .action-group { 
+            padding: 25px 30px 35px; 
+        }
+
+        .btn-confirm { 
+            background: var(--primary-orange); 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 15px; 
+            font-weight: 700;
+            font-size: 1.1rem; 
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(253, 126, 20, 0.2); 
+        }
+
+        .btn-confirm:hover { background: #e36802; transform: translateY(-2px); color: white; }
+
+        .save-qr { color: var(--primary-blue); text-decoration: none; font-weight: 600; font-size: 0.9rem; display: block; margin-top: 15px; }
+
+        /* ปรับแต่งพิเศษสำหรับหน้าจอมือถือ */
+        @media (max-width: 480px) {
+            body { padding: 10px; align-items: flex-start; } 
+            .payment-card { border-radius: 20px; box-shadow: none; }
+            .qr-frame { width: 220px; height: 220px; padding: 10px; }
+            .grand-total { font-size: 2.2rem; }
+            .btn-confirm { padding: 16px; font-size: 1.1rem; }
+            .qr-header img { width: 130px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="payment-card">
+        <div class="qr-header">
+            
+        </div>
+        
+        <div class="qr-section">
+            
+            <div class="qr-frame shadow-sm">
+            <img id="qrCodeImg" src="QR.jpg" style="width:100%" alt="QR Code">
+            </div>
+
+            <div class="timer-info">
+                <i class="far fa-clock me-1"></i> ชำระภายใน <span id="countdown">05 : 00</span>
+            </div>
+        </div>
+
+        <div class="price-box">
+            <span>ยอดชำระเงินทั้งสิ้น</span>
+            <span class="grand-total"><span id="totalDisplay">0.00</span> ฿</span>
+        </div>
+
+        <div class="action-group">
+            <button class="btn-confirm shadow-sm" onclick="finishPayment()">แจ้งชำระเงินเรียบร้อย</button>
+            <a href="javascript:void(0);" class="save-qr" onclick="downloadQR()">
+        </div>
+    </div>
+
+   <script>
+    const API_URL = 'http://localhost:3001';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        //  ปรับการดึงข้อมูลให้รองรับทุกชื่อ (customer_cart หรือ cart)
+        const cartData = localStorage.getItem('customer_cart') || localStorage.getItem('cart');
+        const cart = JSON.parse(cartData) || [];
+        
+        console.log("Cart Data found:", cart); 
+        if (cart.length === 0) {
+            alert("ไม่พบข้อมูลออเดอร์ กรุณาสั่งอาหารใหม่อีกครั้ง");
+            window.location.href = 'customer_order.html';
+            return;
+        }
+
+        let grandTotal = 0;
+        cart.forEach(item => {
+            //  ดักจับทั้งชื่อ price และราคา เพื่อความชัวร์
+            const price = parseFloat(item.price || 0);
+            const qty = parseInt(item.quantity || item.qty || 0);
+            grandTotal += (price * qty);
+        });
+        
+        const formattedTotal = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('totalDisplay').innerText = formattedTotal;
+        runTimer(300);
+    });
+
+    function runTimer(sec) {
+        const display = document.getElementById('countdown');
+        let timer = sec;
+        const interval = setInterval(() => {
+            let mins = Math.floor(timer / 60);
+            let secs = timer % 60;
+            display.textContent = `${mins < 10 ? '0'+mins : mins} : ${secs < 10 ? '0'+secs : secs}`;
+            if (--timer < 0) {
+                clearInterval(interval);
+                alert("หมดเวลาชำระเงิน!");
+                window.location.href = 'customer_order.html';
+            }
+        }, 1000);
+    }
+
+    async function finishPayment() {
+        //  ก่อนไปหน้าถัดไป ต้องบันทึกออเดอร์ลงฐานข้อมูลก่อน (เลียนแบบปุ่มเงินสด)
+        const user = JSON.parse(localStorage.getItem('user'));
+        const cart = JSON.parse(localStorage.getItem('customer_cart') || localStorage.getItem('cart'));
+        
+        const orderData = {
+            user_id: user.user_id,
+            total_price: document.getElementById('totalDisplay').innerText.replace(/,/g, ''),
+            payment_method: 'QR PromptPay', // ระบุว่าเป็นคิวอาร์
+            status: 'Pending',
+            items: cart
+        };
+
+        try {
+            const res = await fetch(`${API_URL}/api/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            if (res.ok) {
+                // จ่ายสำเร็จแล้วค่อยล้างตะกร้า
+                localStorage.removeItem('customer_cart');
+                localStorage.removeItem('cart');
+                window.location.href = 'customer_how_to.html';
+            } else {
+                alert("เกิดข้อผิดพลาดในการบันทึกออเดอร์");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+        }
+    }
+
+    // ในไฟล์ customer_promptpay.html
+function finishPayment() {
+    localStorage.removeItem('customer_cart'); //  ลบตะกร้าที่นี่แทน
+    window.location.href = 'customer_how_to.html';
+
+//  ฟังก์ชันสำหรับบันทึกรูปภาพลงมือถือ/คอมพิวเตอร์
+async function downloadQR() {
+    const qrImage = document.getElementById('qrCodeImg');
+    const imageUrl = qrImage.src; 
+
+    try {
+        // ดึงข้อมูลรูปภาพ
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'NaiiBaanCafe_QR_Payment.jpg'; 
+        
+        document.body.appendChild(link);
+        link.click(); // สั่งคลิกเพื่อดาวน์โหลดอัตโนมัติ
+        
+        // ทำความสะอาดหน่วยความจำ
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        alert("บันทึกรูปภาพสำเร็จ! กรุณาตรวจสอบในโฟลเดอร์ดาวน์โหลดหรือแกลอรี่รูปภาพครับ");
+    } catch (error) {
+        console.error("Download failed:", error);
+        alert("ไม่สามารถบันทึกรูปภาพได้อัตโนมัติ กรุณา 'กดค้างที่รูป QR' เพื่อบันทึกภาพแทนครับ");
+    }
+}}
+</script>
+</body>
+</html>

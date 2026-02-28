@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบเสร็จรับเงิน - Naii Baan Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { --primary-orange: #FD7E14; --bg-cream: #FFF8F0; }
+        body { background-color: var(--bg-cream); font-family: 'Sarabun', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 0; }
+
+        .receipt-container {
+            background: white; width: 100%; max-width: 400px; padding: 45px 35px; border-radius: 25px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.06); text-align: center; position: relative;
+        }
+
+        .success-icon { font-size: 55px; color: #198754; margin-bottom: 20px; }
+        .bill-info { border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; margin: 25px 0; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; color: #777; }
+        .info-val { color: #333; font-weight: 600; }
+
+        .item-list { text-align: left; max-height: 200px; overflow-y: auto; margin-bottom: 25px; padding-right: 5px; }
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .item-name { flex: 1; font-weight: 500; font-size: 0.95rem; line-height: 1.2; }
+        .item-qty { color: #888; font-size: 0.85rem; margin-right: 15px; }
+        .item-price { font-weight: 600; }
+
+        .total-box { display: flex; justify-content: space-between; align-items: center; background: #fdfaf7; padding: 15px 20px; border-radius: 12px; }
+
+        .action-group { display: flex; gap: 12px; margin-top: 35px; }
+        .btn-print { background-color: var(--primary-orange); color: white; border: none; flex: 1; padding: 12px; border-radius: 12px; font-weight: bold; transition: 0.3s; }
+        .btn-print:hover { background-color: #e36802; transform: translateY(-2px); }
+        .btn-back { background-color: white; border: 1px solid #ddd; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; color: #555; text-decoration: none; }
+        .btn-back:hover { background-color: #f8f9fa; color: #333; }
+
+        @media print {
+            body { background: white; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            .action-group, .success-icon { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-container">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h4 class="fw-bold mb-1">ชำระเงินเรียบร้อย</h4>
+        <p class="text-muted small">ขอบคุณที่ใช้บริการ Naii Baan Cafe</p>
+
+        <div class="bill-info">
+            <div class="info-row">
+                <span>หมายเลขบิล:</span>
+                <span class="info-val" id="billId">กำลังโหลด...</span>
+            </div>
+            <div class="info-row">
+                <span>วันที่สั่งซื้อ:</span>
+                <span class="info-val" id="billDate">-</span>
+            </div>
+            <div class="info-row">
+                <span>ช่องทางชำระ:</span>
+                <span class="info-val" id="paymentMethod">-</span>
+            </div>
+        </div>
+
+        <div class="item-list" id="itemList">
+            </div>
+
+        <div class="total-box">
+            <span class="fw-bold text-muted">ยอดสุทธิรวม</span>
+            <span class="fs-3 fw-bold" style="color: var(--primary-orange);"><span id="totalPrice">0.00</span> ฿</span>
+        </div>
+
+        <div class="action-group">
+            <button class="btn-print" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>พิมพ์
+            </button>
+            <button class="btn-back" onclick="goBack()">
+                กลับหน้าหลัก
+            </button>
+        </div>
+    </div>
+
+    <script>
+        
+        const API_URL = 'http://localhost:3001';;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderReceipt();
+        });
+
+        function renderReceipt() {
+            // ดึงข้อมูลจาก localStorage ที่ส่งมาจากหน้า POS หรือ Checkout
+            const billData = localStorage.getItem('last_bill');
+            
+            if (!billData) {
+                alert('ไม่พบข้อมูลใบเสร็จ');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const bill = JSON.parse(billData);
+                
+                // ใส่ข้อมูลส่วนหัว
+                document.getElementById('billId').innerText = '#' + (bill.order_id || 'N/A');
+                document.getElementById('billDate').innerText = bill.date || new Date().toLocaleString('th-TH');
+                
+                // แก้ไขช่องทางชำระเงิน (รองรับทั้งระบบ POS และ Online)
+                const method = bill.payment_method || (bill.items[0]?.payment_method) || 'เงินสด';
+                document.getElementById('paymentMethod').innerText = method;
+                
+                // ใส่ยอดเงินรวม
+                const total = parseFloat(bill.total || bill.total_price || 0);
+                document.getElementById('totalPrice').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+                // ใส่รายการสินค้า
+                const list = document.getElementById('itemList');
+                const items = bill.items || [];
+                
+                if (items.length === 0) {
+                    list.innerHTML = '<p class="text-center text-muted">ไม่มีรายการสินค้า</p>';
+                } else {
+                    list.innerHTML = items.map(item => `
+                        <div class="item-row">
+                            <div class="item-name">
+                                ${item.product_name}
+                                <br><small class="text-muted">฿${parseFloat(item.price).toFixed(2)} x ${item.quantity}</small>
+                            </div>
+                            <div class="item-price">฿${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error("Error rendering receipt:", error);
+                alert('เกิดข้อผิดพลาดในการแสดงผลใบเสร็จ');
+            }
+        }
+
+        function goBack() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            // ถ้าเป็นพนักงานกลับหน้า POS ถ้าเป็นลูกค้ากลับหน้าหลัก
+            if (user && user.role === 'staff') {
+                window.location.href = 'pos.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
