@@ -10,10 +10,12 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 
+// รวม CORS ไว้เป็นอันเดียวแบบนี้ครับ
 app.use(cors({
-    origin: '*', 
+    origin: ['https://naiibaan-cafe.vercel.app', 'http://localhost:3000'], // ยอมรับทั้งเว็บจริงและตอนจูนรันในเครื่อง
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 app.use(express.json());
