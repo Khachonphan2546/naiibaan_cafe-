@@ -7,7 +7,7 @@ const fs = require('fs');
 const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
-const port = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 
 // ✅ 1. ตั้งค่า CORS แบบสมบูรณ์ (อนุญาตทุกแหล่งที่มาเพื่อรองรับ ngrok)
@@ -303,52 +303,53 @@ app.post('/api/register', async (req, res) => {
     
 });
 /* ================== API Google Login (ปรับปรุงใหม่) ================== */
-const client = new OAuth2Client('669190044603-jonumocatej1sdtcfkqmqnp383do3um8.apps.googleusercontent.com');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 app.post('/api/google-login', async (req, res) => {
     const { token } = req.body;
     try {
-        // 1. ตรวจสอบ Token กับ Google
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: '669190044603-jonumocatej1sdtcfkqmqnp383do3um8.apps.googleusercontent.com',
+            audience: process.env.GOOGLE_CLIENT_ID,
         });
+
         const payload = ticket.getPayload();
         const { email, name } = payload;
 
-        // 2. เช็คในฐานข้อมูลว่ามีอีเมลนี้หรือยัง
-        let userRes = await pool.query('SELECT user_id, username, full_name, role, email FROM users WHERE email = $1', [email]);
-        
+        let userRes = await pool.query(
+            'SELECT user_id, username, full_name, role, email FROM users WHERE email = $1',
+            [email]
+        );
+
         let user;
+
         if (userRes.rows.length === 0) {
-            // 3. ถ้ายังไม่มี ให้สมัครสมาชิกให้อัตโนมัติทันที
-            const newUsername = email.split('@')[0] + "_" + Math.floor(Math.random() * 1000); // กันชื่อซ้ำ
+            const newUsername = email.split('@')[0] + "_" + Math.floor(Math.random() * 1000);
+
             const newUserRes = await pool.query(
-                'INSERT INTO users (username, password, full_name, role, email) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, username, full_name, role, email',
+                'INSERT INTO users (username, password, full_name, role, email) VALUES ($1,$2,$3,$4,$5) RETURNING user_id,username,full_name,role,email',
                 [newUsername, 'google_authenticated', name, 'customer', email]
             );
+
             user = newUserRes.rows[0];
-            console.log("🆕 สร้างผู้ใช้ใหม่จาก Google:", email);
         } else {
-            // 4. ถ้ามีแล้ว ให้ดึงข้อมูลมาล็อกอิน
             user = userRes.rows[0];
-            console.log("✅ ผู้ใช้เดิมเข้าสู่ระบบด้วย Google:", email);
         }
 
-        // ส่งข้อมูลผู้ใช้กลับไปให้หน้าบ้านเซฟลง localStorage
-        res.json({ success: true, user: user });
+        res.json({ success: true, user });
 
     } catch (error) {
         console.error("Google verify error:", error);
-        res.status(400).json({ success: false, message: 'การตรวจสอบข้อมูล Google ล้มเหลว' });
+        res.status(400).json({ success: false });
     }
 });
+;
 
 
 // ✅ รันเซิร์ฟเวอร์พร้อมบอกสถานะ
-app.listen(port, () => {
+app.listen(PORT, () => {
     console.log(`-------------------------------------------`);
     console.log(`🚀 Naii Baan Server ONLINE!`);
-    console.log(`🔗 Listening at http://localhost:${port}`);
+    console.log(`Server running on port ${PORT}`);
     console.log(`-------------------------------------------`);
 });
