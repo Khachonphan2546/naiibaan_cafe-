@@ -9,13 +9,13 @@ const { OAuth2Client } = require('google-auth-library');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+/* ================== HEALTH CHECK ================== */
+app.get("/", (req, res) => {
+    res.send("🚀 Server running");
+});
+
 /* ================== CORS ================== */
-app.use(cors({
-    origin: ['https://naiibaan-cafe.vercel.app', 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-}));
+app.use(cors()); // เปิดทั้งหมดก่อน (กัน error deploy)
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,12 +27,12 @@ app.use((req, res, next) => {
 
 /* ================== Static ================== */
 app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'public/uploads')));
 
 /* ================== Upload ================== */
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadPath = './public/uploads/';
+        const uploadPath = path.join(__dirname, '..', 'public/uploads/');
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }

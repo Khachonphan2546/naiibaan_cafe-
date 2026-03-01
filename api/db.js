@@ -1,6 +1,8 @@
 const { Pool } = require("pg");
 
-const config = process.env.DATABASE_URL
+const isProduction = process.env.DATABASE_URL;
+
+const config = isProduction
   ? {
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false }
@@ -14,5 +16,21 @@ const config = process.env.DATABASE_URL
     };
 
 const pool = new Pool(config);
+
+/* ===== ตรวจสอบการเชื่อมต่อ DB ตอน start server ===== */
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error("❌ Database connection failed:", err.message);
+  } else {
+    console.log("✅ Database connected");
+    release();
+  }
+});
+
+/* ===== กัน crash ถ้า DB หลุด ===== */
+pool.on("error", (err) => {
+  console.error("❌ Unexpected DB error", err);
+  process.exit(-1);
+});
 
 module.exports = pool;
