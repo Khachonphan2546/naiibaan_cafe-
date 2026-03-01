@@ -10,11 +10,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-// ✅ 1. ตั้งค่า CORS แบบสมบูรณ์ (อนุญาตทุกแหล่งที่มาเพื่อรองรับ ngrok)
+// รวม CORS ไว้เป็นอันเดียวแบบนี้ครับ
 app.use(cors({
-    origin: '*', 
+    origin: ['https://naiibaan-cafe.vercel.app', 'http://localhost:3000'], // ยอมรับทั้งเว็บจริงและตอนจูนรันในเครื่อง
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 app.use(express.json());
@@ -27,7 +28,7 @@ app.use((req, res, next) => {
 });
 
 // 2. เปิดการเข้าถึงโฟลเดอร์สาธารณะ
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 // ✅ เปิดโฟลเดอร์ uploads ให้สามารถเข้าถึงรูปภาพผ่าน URL ได้
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
@@ -274,6 +275,7 @@ app.get('/api/orders/customer/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Error" }); }
 });
 
+
 app.delete('/api/clear-orders', async (req, res) => {
     const client = await pool.connect();
     try {
@@ -344,6 +346,8 @@ app.post('/api/google-login', async (req, res) => {
     }
 });
 ;
+
+
 
 
 // ✅ รันเซิร์ฟเวอร์พร้อมบอกสถานะ
