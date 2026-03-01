@@ -1,3 +1,5 @@
+const { Pool } = require("pg");
+
 const config = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
@@ -12,3 +14,5 @@ const config = process.env.DATABASE_URL
     };
 
 const pool = new Pool(config);
+
+module.exports = pool;
